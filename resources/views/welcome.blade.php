@@ -70,9 +70,19 @@
                 <div class="top-right links">
                     @auth
                         <a href="{{ url('/home') }}">Home</a>
+                        @can('admin-higher')
+                            <a href="{{ route('register') }}">Register</a>
+                        @elsecan('crud-higher')
+                            <a href="">crud-higher</a>
+                        @elsecan('cru-higher')
+                            <a href="">cru-higher</a>
+                        @elsecan('ru-higher')
+                            <a href="">ru-higher</a>
+                        @elsecan('r-higher')
+                            <a href="">r-higher</a>
+                        @endcan
                     @else
                         <a href="{{ route('login') }}">Login</a>
-                        <a href="{{ route('register') }}">Register</a>
                     @endauth
                 </div>
             @endif
