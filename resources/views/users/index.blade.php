@@ -11,7 +11,7 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     <!-- Styles -->
-    <link href="{{ secure_asset('css/app.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>
     <div id="app">
@@ -44,7 +44,7 @@
                         <!-- Authentication Links -->
                         @guest
                             <li><a href="{{ route('login') }}">Login</a></li>
-                            <!-- <li><a href="{{ route('register') }}">Register</a></li> -->
+                            <li><a href="{{ route('register') }}">Register</a></li>
                         @else
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" v-pre>
@@ -52,18 +52,11 @@
                                 </a>
 
                                 <ul class="dropdown-menu">
-                                    <li>{!! link_to_route('users.index', 'Users') !!}</li>
-                                    <li>{!! link_to_route('users.show', 'Profile', ['id' => Auth::user()->id]) !!}</li>
+                                    <!-- <li>{!! link_to_route('users.index', 'Users') !!}</li> -->
                                     @can('admin-higher')
                                         <li><a href="{{ route('register') }}">Register</a></li>
                                     @endcan
-                                    
-                                    @can('cru-higher')
-                                        <li><a href="{{ route('tasks.create') }}">Task-Create</a></li>
-                                    @endcan
-                                    
-                                    <li><a href="{{ route('taskhistories.index') }}">History</a></li>
-                                    
+                                    <li>{!! link_to_route('users.show', 'My profile', ['id' => Auth::id()]) !!}</li>
                                     <li>
                                         <a href="{{ route('logout') }}"
                                             onclick="event.preventDefault();
@@ -84,6 +77,65 @@
         </nav>
 
         @yield('content')
+        
+@if (count($users) > 0)
+<ul class="media-list">
+    <h1>User Count : {{ count($users) }}</h1>
+@foreach ($users as $user)
+    <li class="media">
+        <div class="media-left">
+            <img class="media-object img-rounded" src="{{ Gravatar::src($user->email, 100) }}" alt="">
+        </div>
+        <div class="media-body">
+            <div>
+                {{ $user->email }}
+            </div>
+            <div>
+                ID : {{ $user->id }} / Name : {{ $user->name }}
+            </div>
+            <div>
+                @switch($user->role)
+                    @case(1)
+                        User Role : System-Administrator(1)
+                        @break
+            
+                    @case(3)
+                        User Role : Administrator(3)
+                        @break
+            
+                    @case(5)
+                        User Role : CRUD(5)
+                        @break
+        
+                    @case(7)
+                        User Role : CRU(7)
+                        @break
+        
+                    @case(8)
+                        User Role : Read & Update(8)
+                        @break
+        
+                    @case(10)
+                        User Role : Read-Only(10)
+                        @break
+        
+                    @default
+                        User Role : Unkwoun(default)
+                @endswitch
+            </div>
+            <div>
+                Last Login : {{ $user->last_login_at }}
+            </div>
+            <div>
+                <p>{!! link_to_route('users.show', 'View profile', ['id' => $user->id]) !!}</p>
+            </div>
+        </div>
+    </li>
+@endforeach
+</ul>
+{!! $users->render() !!}
+@endif
+        
     </div>
 
     <!-- Scripts -->

@@ -11,23 +11,19 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', 'TasksController@index');
 
 // Auth::routes();
 // Authentication Routes...
-$this->get('login', 'Auth\LoginController@showLoginForm')->name('login');
-$this->post('login', 'Auth\LoginController@login');
-$this->post('logout', 'Auth\LoginController@logout')->name('logout');
+Route::get('login', 'Auth\LoginController@showLoginForm')->name('login');
+Route::post('login', 'Auth\LoginController@login');
+Route::post('logout', 'Auth\LoginController@logout')->name('logout');
 
 // Password Reset Routes...
-$this->get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')->name('password.request');
-$this->post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')->name('password.email');
-$this->get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')->name('password.reset');
-$this->post('password/reset', 'Auth\ResetPasswordController@reset');
-
-Route::get('/home', 'HomeController@index')->name('home');
+Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')->name('password.request');
+Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')->name('password.email');
+Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')->name('password.reset');
+Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 
 //送信メール本文のプレビュー
 
@@ -38,32 +34,52 @@ Route::get('sample/mailable/preview', function (){
 // サンプルメール送信テスト
 Route::get('sample/mailable/send', 'SampleController@SampleNotification');
 
-// 全ユーザー
-Route::group(['middleware' => ['auth', 'can:r-higher']], function () {
-    // ユーザー一覧
-    Route::get('/account', 'AccountController@index')->name('account.index');
+// システム管理者のみ
+Route::group(['middleware' => ['auth', 'can:system-only']], function () {
+    //
 });
 
 // 管理者以上
 Route::group(['middleware' => ['auth', 'can:admin-higher']], function () {
-    // ユーザー登録
-    Route::get('/account/regist', 'AccountController@regist')->name('account.regist');
-    Route::post('/account/regist', 'AccountController@createData')->name('account.regist');
-
+    
     // ユーザー編集
-    Route::get('/account/edit/{user_id}', 'AccountController@edit')->name('account.edit');
-    Route::post('/account/edit/{user_id}', 'AccountController@updateData')->name('account.edit');
+    // Route::get('users/edit/{user_id}', 'UsersController@edit')->name('users.edit');
+    // Route::post('users/edit/{user_id}', 'UsersController@update')->name('users.update');
     
     // ユーザー削除
-    Route::post('/account/delete/{user_id}', 'AccountController@deleteData');
+    Route::post('users/delete/{user_id}', 'UsersController@delete')->name('users.destroy');
     
     // Registration Routes...
-    $this->get('register', 'Auth\RegisterController@showRegistrationForm')->name('register');
-    $this->post('register', 'Auth\RegisterController@register');
+    Route::get('register', 'Auth\RegisterController@showRegistrationForm')->name('register');
+    Route::post('register', 'Auth\RegisterController@register');
 
 });
 
-// システム管理者のみ
-Route::group(['middleware' => ['auth', 'can:system-only']], function () {
-    //
+// CRUD以上
+Route::group(['middleware' => ['auth', 'can:crud-higher']], function () {
+    Route::delete('delete/{task}', 'TasksController@destroy')->name('tasks.delete');
+});
+
+// CRU以上
+Route::group(['middleware' => ['auth', 'can:cru-higher']], function () {
+    //Route::get('tasks/create', 'TasksController@create')->name('tasks.create');
+    Route::resource('tasks', 'TasksController', ['only' => ['create', 'store']]);
+});
+
+// RU以上
+Route::group(['middleware' => ['auth', 'can:ru-higher']], function () {
+    Route::get('edit/{task}', 'TasksController@edit')->name('tasks.edit');
+    Route::put('edit/{task}', 'TasksController@update')->name('tasks.update');
+});
+
+// 全ユーザー
+Route::group(['middleware' => ['auth', 'can:r-higher']], function () {
+    // ユーザー一覧
+    Route::resource('users', 'UsersController', ['only' => ['index', 'show']]);
+    Route::get('users/edit/{user_id}', 'UsersController@edit')->name('users.edit');
+    Route::put('users/edit/{user_id}', 'UsersController@update')->name('users.update');
+    Route::get('tasks/{task}', 'TasksController@show')->name('tasks.show');
+    //Route::resource('tasks', 'TasksController', ['only' => ['show']]);
+    Route::get('taskhistories/index', 'TaskhistoriesController@index')->name('taskhistories.index');
+    Route::get('taskhistories/{taskhistory}', 'TaskhistoriesController@show')->name('taskhistories.show');
 });

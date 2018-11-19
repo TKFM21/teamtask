@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class HomeController extends Controller
+class TaskhistoriesController extends Controller
 {
     protected $redirectTo = 'login';
     
@@ -17,14 +17,11 @@ class HomeController extends Controller
     {
         $this->middleware('auth');
     }
-
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    
     public function index()
     {
-        return view('home');
+        $taskhistories = Taskhistory::all();
+        return view('taskhistories.index', ['taskhistories' => $taskhistories]);
     }
+    
 }
